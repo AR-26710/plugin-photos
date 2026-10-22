@@ -11,7 +11,7 @@ import run.halo.photos.vo.PhotoVo;
 class PhotoUrlBuilderTest {
 
     @Test
-    void detailUrlIncludesFullContextFromRequest() {
+    void detailUrlCarriesGroupContextOnly() {
         var builder = builder(Map.of(
             "group", "trips",
             "page", "2",
@@ -19,7 +19,17 @@ class PhotoUrlBuilderTest {
         ));
 
         assertThat(builder.detail(photoVo("abc")))
-            .isEqualTo("/photos/abc?group=trips&page=2&size=20");
+            .isEqualTo("/photos/abc?group=trips");
+    }
+
+    @Test
+    void detailUrlDropsPaginationContext() {
+        var builder = builder(Map.of(
+            "page", "2",
+            "size", "20"
+        ));
+
+        assertThat(builder.detail(photoVo("abc"))).isEqualTo("/photos/abc");
     }
 
     @Test
@@ -28,7 +38,7 @@ class PhotoUrlBuilderTest {
             "page", "2"
         ));
 
-        assertThat(builder.detail(photoVo("abc"))).isEqualTo("/photos/abc?page=2");
+        assertThat(builder.detail(photoVo("abc"))).isEqualTo("/photos/abc");
     }
 
     @Test
@@ -39,7 +49,7 @@ class PhotoUrlBuilderTest {
         ));
 
         assertThat(builder.detail(photoVo("abc"), Map.of("group", "other")))
-            .isEqualTo("/photos/abc?group=other&page=2");
+            .isEqualTo("/photos/abc?group=other");
     }
 
     @Test
@@ -50,13 +60,14 @@ class PhotoUrlBuilderTest {
         ));
 
         assertThat(builder.detail(photoVo("abc"), Map.of("group", "")))
-            .isEqualTo("/photos/abc?page=2");
+            .isEqualTo("/photos/abc");
     }
 
     @Test
     void detailUrlIgnoresNonWhitelistedParameters() {
         var contextParams = new LinkedHashMap<String, String>();
         contextParams.put("group", "trips");
+        contextParams.put("page", "2");
         contextParams.put("debug", "true");
 
         var builder = builder(contextParams);

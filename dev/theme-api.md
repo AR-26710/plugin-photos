@@ -72,8 +72,8 @@
 | `list()` | `String` | 返回 `/photos` |
 | `list(group)` | `String` | 返回 `/photos?group={group}`，`group` 为空时省略 |
 | `list(group, page, size)` | `String` | 返回 `/photos?group=&page=&size=`，空白或非正值参数自动省略 |
-| `detail(photo)` | `String` | 返回 `/photos/{name}`，并附加当前请求中白名单内的上下文参数（`group`、`page`、`size`） |
-| `detail(photo, overrides)` | `String` | 同上，但允许通过 `Map` 覆盖单个参数值；传入空字符串可从最终 URL 中移除该参数 |
+| `detail(photo)` | `String` | 返回 `/photos/{name}`，并附加当前请求中的 `group` 上下文参数（如适用）；分页参数 `page`、`size` 不会附加 |
+| `detail(photo, overrides)` | `String` | 同上，但允许通过 `Map` 覆盖 `group` 值；传入空字符串可从最终 URL 中移除该参数 |
 
 示例：
 
@@ -95,17 +95,18 @@
 
 | 参数 | 说明 |
 | ---- | ---- |
-| `group` | 图片分组名称，用于回传上下文 |
-| `page` | 分页页码，用于回传上下文 |
-| `size` | 每页条数，用于回传上下文 |
+| `group` | 图片分组名称，用于限定上一张/下一张与序号的统计范围 |
+| `page` | 分页页码，仅用于构造返回列表的链接（兼容旧链接） |
+| `size` | 每页条数，仅用于构造返回列表的链接（兼容旧链接） |
 
 示例：
 
 ```
-/photos/photo-abc123?group=photo-group-UEcvi&page=2&size=20
+/photos/photo-abc123
+/photos/photo-abc123?group=photo-group-UEcvi
 ```
 
-主题作者建议使用 `${photoUrl.detail(photo)}` 生成详情链接，避免手动拼接查询字符串。
+主题作者建议使用 `${photoUrl.detail(photo)}` 生成详情链接，避免手动拼接查询字符串。由 `photoUrl.detail(...)` 生成的详情链接只会携带 `group` 上下文，不会携带 `page`、`size` 分页参数。
 
 #### 模板变量
 
@@ -128,7 +129,7 @@
 #### 错误与重定向行为
 
 - 请求的图片不存在或已被软删除 → `404 Not Found`
-- URL 中的 `group` 与图片实际 `spec.groupName` 不一致 → `302 Found` 重定向到 `/photos/{name}`，并去掉错误的 `group` 查询参数（其他参数保留）
+- URL 中的 `group` 与图片实际 `spec.groupName` 不一致 → `302 Found` 重定向到规范地址 `/photos/{name}`（不带任何查询参数）
 
 #### 缩略图条示例
 

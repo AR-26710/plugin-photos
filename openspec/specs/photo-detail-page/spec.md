@@ -35,17 +35,17 @@ The plugin SHALL keep `GET /photos/page/{page}` resolvable by issuing a `301 Mov
 
 ### Requirement: Theme-Side Photo Detail Route
 
-The plugin SHALL register a theme-side `GET /photos/{name}` route that renders a single photo. The route MUST read context query parameters `group`, `page`, and `size` to mirror the originating list view.
+The plugin SHALL register a theme-side `GET /photos/{name}` route that renders a single photo. The route MUST read the `group` query parameter to scope the neighbor context, and MAY read `page` and `size` query parameters when present to build the back-link (for compatibility with links generated before pagination parameters were removed from detail URLs).
 
 #### Scenario: Detail request for an existing photo
 
 - **WHEN** a visitor requests `GET /photos/{name}` and a `Photo` with that `metadata.name` exists and is not soft-deleted
 - **THEN** the response renders the `photo` template with the photo and its neighboring photos as model attributes
 
-#### Scenario: Detail request preserves list context
+#### Scenario: Detail request preserves group context
 
-- **WHEN** a visitor requests `GET /photos/{name}?group=trips&page=2&size=20`
-- **THEN** the rendered template receives `group=trips`, `page=2`, `size=20` as model attributes for use in back-links and neighbor links
+- **WHEN** a visitor requests `GET /photos/{name}?group=trips`
+- **THEN** the rendered template receives `group=trips` as a model attribute, and `page=1` plus the configured default `size` for back-link construction
 
 ### Requirement: Detail Route Returns 404 For Missing Or Deleted Photos
 
@@ -63,12 +63,12 @@ The detail route SHALL respond with `404 Not Found` when the requested photo doe
 
 ### Requirement: Detail Route Self-Corrects Mismatched Group Context
 
-When the URL supplies a `group` query parameter that does not match the resolved photo's actual `spec.groupName`, the detail route SHALL respond with `302 Found` to the same `/photos/{name}` path with the `group` parameter removed and all other query parameters preserved.
+When the URL supplies a `group` query parameter that does not match the resolved photo's actual `spec.groupName`, the detail route SHALL respond with `302 Found` to the canonical detail address `/photos/{name}` without any query parameters.
 
 #### Scenario: URL group does not match photo group
 
 - **WHEN** a visitor requests `GET /photos/{name}?group=A&page=2` and the photo's `spec.groupName` is `B` (or empty)
-- **THEN** the response is `302 Found` with `Location: /photos/{name}?page=2` (no `group` parameter)
+- **THEN** the response is `302 Found` with `Location: /photos/{name}` (no query parameters)
 
 #### Scenario: URL group matches photo group
 

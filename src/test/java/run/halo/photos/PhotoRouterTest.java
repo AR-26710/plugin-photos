@@ -129,7 +129,7 @@ class PhotoRouterTest {
             .expectStatus().isFound()
             .expectHeader().value(HttpHeaders.LOCATION,
                 location -> assertThat(location)
-                    .isEqualTo("/photos/abc?page=2"));
+                    .isEqualTo("/photos/abc"));
     }
 
     @Test

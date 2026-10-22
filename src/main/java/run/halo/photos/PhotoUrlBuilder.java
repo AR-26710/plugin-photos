@@ -12,6 +12,10 @@ import run.halo.photos.vo.PhotoVo;
  * Per-request URL helper exposed to theme templates as {@code photoUrl}. Lets templates
  * build context-preserving links to the photo list and detail pages without hand-concatenating
  * query strings.
+ *
+ * <p>Detail URLs carry only the {@code group} context so each photo keeps a single canonical
+ * address; pagination parameters ({@code page}, {@code size}) belong to the list page and are
+ * never propagated to detail links.
  */
 public class PhotoUrlBuilder {
 
@@ -19,8 +23,7 @@ public class PhotoUrlBuilder {
     static final String PAGE_PARAM = "page";
     static final String SIZE_PARAM = "size";
 
-    private static final List<String> CONTEXT_PARAMS =
-        List.of(GROUP_PARAM, PAGE_PARAM, SIZE_PARAM);
+    private static final List<String> CONTEXT_PARAMS = List.of(GROUP_PARAM);
 
     private final Map<String, String> contextParams;
 
@@ -45,7 +48,7 @@ public class PhotoUrlBuilder {
     }
 
     /**
-     * Build a detail-page URL for a photo, preserving current context parameters.
+     * Build a detail-page URL for a photo, preserving the current group context.
      *
      * @param photo the photo to link to
      * @return the detail URL, e.g. {@code /photos/my-photo?group=album}
@@ -55,9 +58,9 @@ public class PhotoUrlBuilder {
     }
 
     /**
-     * Build a detail-page URL for a photo, with optional parameter overrides.
+     * Build a detail-page URL for a photo, with an optional {@code group} override.
      *
-     * @param photo    the photo to link to
+     * @param photo     the photo to link to
      * @param overrides parameter overrides; blank values remove the parameter
      * @return the detail URL
      */

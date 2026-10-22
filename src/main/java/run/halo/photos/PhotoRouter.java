@@ -151,8 +151,7 @@ public class PhotoRouter {
         String group, int page, int size) {
         String photoGroup = photo.getSpec() == null ? null : photo.getSpec().getGroupName();
         if (StringUtils.isNotBlank(group) && !group.equals(photoGroup)) {
-            URI redirectTo = stripQueryParam(request, GROUP_PARAM,
-                "/photos/" + photo.getMetadata().getName());
+            URI redirectTo = URI.create("/photos/" + photo.getMetadata().getName());
             return ServerResponse.status(HttpStatus.FOUND).location(redirectTo).build();
         }
         return renderDetail(request, photo, group, page, size);
@@ -326,20 +325,6 @@ public class PhotoRouter {
             builder.queryParam(GROUP_PARAM, group);
         }
         return builder.build().toUriString();
-    }
-
-    private static URI stripQueryParam(ServerRequest request, String paramToStrip,
-        String basePath) {
-        var builder = UriComponentsBuilder.fromPath(basePath);
-        request.queryParams().forEach((key, values) -> {
-            if (paramToStrip.equals(key)) {
-                return;
-            }
-            values.stream()
-                .filter(StringUtils::isNotBlank)
-                .forEach(value -> builder.queryParam(key, value));
-        });
-        return URI.create(builder.build().toUriString());
     }
 
     private static String queryParam(ServerRequest request, String name) {
